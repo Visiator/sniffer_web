@@ -4,7 +4,7 @@ header('Last-Modified: Mon, 1 Jul 2019 05:00:00 GMT');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 
-$auto_ban_spur_nic = "Unblock Master VPN";
+$auto_ban_spur_nic = "Xvpn";
 
 
 date_default_timezone_set('UTC');
@@ -101,6 +101,8 @@ function get_traffic($dir, $filename)
     return '';
 };
 
+echo(1111);
+
 mkdir("ip3");
 chmod("ip3", 0777);
 mkdir("sess");
@@ -122,6 +124,8 @@ $tt .= '<tr>'.
                 '<td>add_mikrotik</td>'.
                 '<td>stat</td>'.
                 '<td>del_mikrotik</td>'.
+                '<td>copy pcap</td>'.
+        
                 '</tr>'."\r\n";
 
 $i = 0;
@@ -148,6 +152,9 @@ foreach ($f as $file)
                 '<td><a href=javascript:add_mikrotik('.$i.')>add_mikrotik</a></td>'.
                 '<td id=firewall_'.$i.'>?</td>'.
                 '<td><a href=javascript:del_mikrotik('.$i.')>del_mikrotik</a></td>'.
+                '<td><a href=javascript:copy_pcap('.$i.')>copy pcap</a></td>'.
+                '<td><a href=javascript:show_sess_list('.$i.')>W</a></td>'.
+                
                 '</tr>'."\r\n";
         $i++;
     };
@@ -233,7 +240,23 @@ let auto_ban_spur_nic = "<? echo $auto_ban_spur_nic; ?>";
 
 function on_load()
 {
-  setInterval( function() { ttimer(); } , 50);
+  setInterval( function() { ttimer(); } , 55);
+};
+
+function show_sess_list(v) {
+    o = document.getElementById('ip_'+v).innerHTML;
+    window.open("show_sess_list.php?id="+o, '_blank');
+};
+
+function copy_pcap_result(v) {
+    console.log('copy_pcap_result='+v);
+};
+
+function copy_pcap(idx) {
+    o = document.getElementById('ip_'+idx);
+    if(o == null) return;
+    //alert(o.innerHTML);
+    document.getElementById('frm_tmp2').src = "copy_pcap.php?id=" + o.innerHTML;
 };
 
 var mdiv_innerHTML = "";
@@ -254,6 +277,36 @@ function clear_all_firewall_color() {
         ii++;
     };    
 };
+
+function set_firewall_color_by_ip(mm) {
+
+    console.log('set_firewall_color_by_ip');
+
+    ii = 0;
+    while(1==1) {
+        o = document.getElementById('ip_'+ii);
+        
+        if(o == null) { return; }
+        else {
+            let xx = o.innerHTML.split(":");
+            
+            if(xx[0] == mm) {
+                o.className = "ipFirewall";
+                //document.getElementById('firewall_'+ii).innerHTML = rrr[1] + ' / ' + rrr[2];
+                document.getElementById('dns_'+ii).className = "ipFirewall";
+                document.getElementById('sni_'+ii).className = "ipFirewall";
+                document.getElementById('traffic_'+ii).className = "ipFirewall";
+                document.getElementById('geo_'+ii).className = "ipFirewall";
+            };
+        };
+        
+        
+        
+        ii++;
+    };
+
+
+}
 
 function set_firewall_color(mm) {
     
@@ -290,10 +343,15 @@ function need_refresh_firewall() {
     //document.getElementById('check_firewall').checked = true;
 };
 
-function mikrotik_result(r, mode, idx) {
-    //console.log(r);
-    //console.log(mode);
-    //console.log(idx);
+function mikrotik_result(r, mode, ip) {
+    console.log('r=|'+r+'|');
+    console.log(mode);
+    console.log(ip);
+    
+    if(r == "add " || r == "already exists ") {
+        console.log('555555555');
+        set_firewall_color_by_ip(ip);
+    };
     
     if(mode == 'firewall_print') {
         clear_all_firewall_color();
@@ -306,51 +364,58 @@ function mikrotik_result(r, mode, idx) {
         };
         wait_refresh_firewall = 0;
     } else {
-      need_refresh_firewall();  
+        need_refresh_firewall();  
     };
     
-    frame_use = 0;
+    free_frame_use('mikrotik_result');
 }
 
-function use_mikrotik() {
-
-    return true;
+function allow_mikrotik() {
+    o = document.getElementById('allow_mikrotik');
+    if(o != null) {
+        if(o.checked == true) {
+            console.log('+++');
+            return true;
+        };
+    };
+    console.log('---');
+    return false;
 };
 
 function add_mikrotik(idx) {
-    if(use_mikrotik()==false) return;
+    if(allow_mikrotik()==false) return;
     
     o = document.getElementById('ip_'+idx);
     if(o != null) {
         ip = o.innerHTML;
-        if(frame_use == 0)
+        if(frame_use_ == 0)
         {
-            frame_use = 1;
+            set_frame_use('add_mikrotik');
             //console.log('frame START '+ ip);
             document.getElementById('frm_tmp2').src = "mikrotik.php?ip=" + ip + '&mode=firewall_add';
         }
         else
         {
-          alert('Busy');
+          console.log('Busy');
         };
     };
 };
 
 function del_mikrotik(idx) {
-    if(use_mikrotik()==false) return;
+    if(allow_mikrotik()==false) return;
     
     o = document.getElementById('ip_'+idx);
     if(o != null) {
         ip = o.innerHTML;
-        if(frame_use == 0)
+        if(frame_use_ == 0)
         {
-            frame_use = 1;
+            set_frame_use('del_mikrotik');
             //console.log('frame START '+ ip);
             document.getElementById('frm_tmp').src = "mikrotik.php?ip=" + ip + '&mode=firewall_del';
         }
         else
         {
-          alert('Busy');
+          console.log('Busy');
         };
     };
 };
@@ -401,7 +466,16 @@ function to_h(v1, v2)
   return a1+a2;
 };
 
-var frame_use = 0;
+var frame_use_ = 0;
+function set_frame_use(v) {
+    if(v != 'update') console.log('SET '+v);
+    frame_use_ = 1;
+};
+function free_frame_use(v) {
+    if(v != 'update_result') console.log('FREE '+v);
+    frame_use_ = 0;
+};
+
 
 function spur_curl_result(r, iidx)
 {
@@ -419,16 +493,32 @@ function spur_curl_result(r, iidx)
     o = document.getElementById('spur_'+iidx).innerHTML = s;
 
 
-    frame_use = 0;
+    free_frame_use('spur_curl_result');
 };
 
 var ggg = 0;
 
+function allow_spur() {
+
+    return false;
+};
+
+function allow_spur() {
+    o = document.getElementById('allow_spur');
+    if(o != null) {
+        if(o.checked == true) {
+            return true;
+        };
+    };
+    return false;
+};
+
 function spur(idx, ip)
 {
-  if(frame_use == 0)
+  if(frame_use_ == 0)
   {
-    frame_use = 1;
+      if(allow_spur() == false) return;
+    set_frame_use('spur');
     //console.log('frame START '+ ip);
 
     document.getElementById('frm_tmp').src = "spur_curl.php?ip=" + ip + '&idx='+idx;
@@ -460,6 +550,9 @@ function scan_spur_cell() {
     i = 0;
     while(1==1)
     {
+        
+        if(allow_mikrotik()==false) return;
+        
         n = document.getElementById('spur_'+i);
         if(n == null) {
             return;
@@ -488,6 +581,7 @@ function scan_spur_cell() {
 }
 
 function ttimer_autobanspur() {
+    if(allow_spur()==false) return;
     use_autobanspur = 1;
     
     scan_spur_cell();
@@ -556,9 +650,11 @@ function ttimer()
         };
     };
     
-    if( ggg + 300 < Date.now() ) {
+    if( ggg + 3000 < Date.now() ) {
         ggg = Date.now();
-        update();
+        if(wait_refresh_firewall == 0) {
+           update();
+        }
     };
     
     if( mdiv_innerHTML != "" ) {
@@ -576,7 +672,7 @@ function ttimer_autoadd() {
 
     console.log("-----------"+aag);
 
-    if(frame_use != 0) return;
+    if(frame_use_ != 0) return;
 
     if(aag == -1) aag = 0;
 
@@ -601,14 +697,14 @@ function ttimer_autoadd() {
 function geoip_result(r, iidx)
 {
     o = document.getElementById('geo_'+iidx).innerHTML = r;
-   frame_use = 0;
+   free_frame_use('geoip_result');
 };
 
 function ggeo(idx, ip)
 {
-  if(frame_use == 0)
+  if(frame_use_ == 0)
   {
-    frame_use = 1;
+    set_frame_use('ggeo');
     //console.log('frame START '+ ip);
 
     document.getElementById('frm_tmp').src = "geoip.php?ip=" + ip + '&idx='+idx;
@@ -648,10 +744,10 @@ function ttimer_geo() {
 
 function ttimer_firewall() {
 
-    if(use_mikrotik()==false) return;
+    if(allow_mikrotik()==false) return;
 
-    if(frame_use == 0) {
-        frame_use = 1;
+    if(frame_use_ == 0) {
+        set_frame_use('ttimer_firewall');
         
         c = document.getElementById('check_firewall');
         c.checked = false;
@@ -673,13 +769,13 @@ function cpp_result(r, iidx)
     o = document.getElementById('cpp_'+iidx).innerHTML = s;
 
 
-    frame_use = 0;
+    free_frame_use('cpp_result');
 };
 
 function cppp(idx, ip, sni) {
-  if(frame_use == 0)
+  if(frame_use_ == 0)
   {
-    frame_use = 1;
+    set_frame_use('cppp');
     console.log('cpp START '+ ip);
 
     document.getElementById('frm_tmp2').src = "cpp.php?ip=" + ip + '&idx='+idx+'&sni='+sni;
@@ -875,9 +971,9 @@ while(1==1)
     if(n == null) {
         console.log('need add ' + ip);
         add_line_to_maintable(ii, ip);
-        document.getElementById('check_spur').checked = true;
-        document.getElementById('check_geo').checked = true;
-        document.getElementById('check_firewall').checked = true;
+        if(allow_spur())  document.getElementById('check_spur').checked = true;
+        //document.getElementById('check_geo').checked = true;
+        if(allow_mikrotik()) document.getElementById('check_firewall').checked = true;
         return;
     };
     
@@ -911,12 +1007,12 @@ function update_result(r) {
     //console.log('endd');
     
     
-    frame_use = 0;
+    free_frame_use('update_result');
 };
 
 function update() {
-    if(frame_use == 0) {
-        frame_use = 1;
+    if(frame_use_ == 0) {
+        set_frame_use('update');
         document.getElementById('frm_tmp').src = "update.php";
     } else {
         console.log('busy u');
@@ -1052,7 +1148,8 @@ while($j < $i)
     <td><a href="javascript:clear_list()">clear list</a></td>
     <td id="update_id">update</td>
     <td><input type="checkbox" id=check_autoadd value="1">auto add microtik</p></td>
-    <td><input type="checkbox" id=use_mikrotik value="1">use mikrotik</p></td>
+    <td><input type="checkbox" id=allow_mikrotik value="1">allow mikrotik</p></td>
+    <td><input type="checkbox" id=allow_spur value="1">allow spur</p></td>
 </tr>
 </table>
 <div class="prokrutka" id="mdiv">

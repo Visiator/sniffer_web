@@ -55,11 +55,16 @@ function is_ip_in_rule_exists($server, $login, $pass, $ip) {
     return $r;
 }
 
-function exec_command_firewall_add($server, $login, $pass, $ip) {
+function del_file($ff) {
+    unlink($ff);
+}
+
+function exec_command_firewall_add($server, $login, $pass, $ip, $smode) {
     echo 'add<br>';
     $r = 'add';
     
     if(is_ip_in_rule_exists($server, $login, $pass, $ip) != '') {
+        if($smode == 'delneedblock') { del_file("need_block/".$ip); };
         return 'already exists ';
     }
     
@@ -125,6 +130,9 @@ if( isset($_GET['ip'])) { $ip = get_ip($_GET['ip']); };
 $mode = '';
 if( isset($_GET['mode'])) { $mode = $_GET['mode']; };
 
+$smode = '';
+if( isset($_GET['smode'])) { $smode = $_GET['smode']; };
+
 $idx = '';
 if( isset($_GET['idx'])) { $idx = $_GET['idx']; };
 
@@ -141,7 +149,7 @@ $pass = 'Qq1233!!';//'Mikro1233$}}!!';
 
 
 
-if($mode == 'firewall_add') $r = exec_command_firewall_add($server, $login, $pass, $ip);
+if($mode == 'firewall_add') $r = exec_command_firewall_add($server, $login, $pass, $ip, $smode);
 if($mode == 'firewall_del') $r = exec_command_firewall_del($server, $login, $pass, $ip);
 if($mode == 'firewall_print') $r = exec_command_firewall_print($server, $login, $pass, $ip);
 
@@ -199,7 +207,7 @@ if ($API->connect('192.168.1.142', 'admin', '111')) {
 
 function on_load()
 {
-  parent.mikrotik_result('<? echo $r; ?>','<? echo $mode; ?>','<? echo $idx; ?>');
+  parent.mikrotik_result('<? echo $r; ?>','<? echo $mode; ?>','<? echo $ip; ?>');
 };
 
 //-->
