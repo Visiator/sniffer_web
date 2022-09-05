@@ -650,7 +650,7 @@ function ttimer()
         };
     };
     
-    if( ggg + 3000 < Date.now() ) {
+    if( ggg + 500 < Date.now() ) {
         ggg = Date.now();
         if(wait_refresh_firewall == 0) {
            update();
