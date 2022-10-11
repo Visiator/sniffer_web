@@ -18,7 +18,7 @@ $rr = '';
 $f = scandir("need_block");
 foreach ($f as $file)
 {
-    if($file != '.' && $file != '..')
+    if($file != '.' && $file != '..' && $file != 'already')
     {
         
         $rr .= $file;

@@ -187,7 +187,7 @@ function delfile_result(v) {
 function del_file(ip) {
     set_frame_use('del_file');
     console.log('frame START   delfile.php?ip='+ ip);
-    document.getElementById('frm_tmp').src = "delfile.php?file=need_block/" + ip;
+    document.getElementById('frm_tmp').src = "delfile.php?file=need_block/" + ip+"&new=need_block/already/"+ip;
 };
 
 

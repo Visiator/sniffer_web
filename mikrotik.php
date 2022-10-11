@@ -65,11 +65,11 @@ function exec_command_firewall_add($server, $login, $pass, $ip, $smode) {
     
     if(is_ip_in_rule_exists($server, $login, $pass, $ip) != '') {
         if($smode == 'delneedblock') { del_file("need_block/".$ip); };
-        return 'already exists ';
+        return 'already exists+ ';
     }
     
     $API = new RouterosAPI();
-    $API->debug = false;
+    $API->debug = true;
     if ($API->connect($server, $login, $pass)) {
         $API->comm("/ip/firewall/filter/add", array("chain" => "forward", "action" => "drop", "dst-address" => $ip));
         $API->disconnect();        
@@ -85,7 +85,7 @@ function exec_command_firewall_del($server, $login, $pass, $ip) {
     echo '['.$iid.']';
     
     $API = new RouterosAPI();
-    $API->debug = false;
+    $API->debug = true;
     if ($API->connect($server, $login, $pass)) {
         $API->comm("/ip/firewall/filter/remove", array(".id" => $iid));
         $API->disconnect();        

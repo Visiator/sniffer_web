@@ -21,7 +21,10 @@ function get_ip($s) {
 
 $file = '';
 if( isset($_GET['file'])) { $file = get_ip($_GET['file']); };
-unlink($file);
+$new = '';
+if( isset($_GET['new'])) { $new = get_ip($_GET['new']); };
+
+rename($file, $new);
 $rr = $file;
 
 ?>
@@ -43,6 +46,7 @@ function on_load()
 //-->
 </script>
 file = <? echo $file; ?><br>
+new = <? echo $new; ?><br>
 result = <? echo $rr; ?>
 </body>
 
