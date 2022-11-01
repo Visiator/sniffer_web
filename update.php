@@ -8,6 +8,28 @@ ini_set('display_errors', '1');
 
 date_default_timezone_set('UTC');
 
+function get_sni($dir, $filename)
+{
+    $fff = file_get_contents($dir .'/'. $filename);
+
+    $ff = explode("\n", $fff);
+    $s = '';
+    $c = '';
+    foreach($ff as $f)
+    {
+
+        $v = explode(":", $f, 2);
+        if($v[0] == 'sni') {
+	    $s = $v[1];
+        }
+        if($v[0] == 'cert') {
+            $c = 'cert='.$v[1];
+        }
+    };
+    //if($c == '') return $s;
+    //if($s == '') return $c;
+    return $c.' | '.$s;
+};
 
 
 function get_dt()
@@ -74,7 +96,7 @@ function my_scan_dir($dir)
             
             
             
-            $rr .= $file."\\t".get_traffic($dir, $file)."\\t".get_dns($dir, $file)."\\n";
+            $rr .= $file."\\t".get_traffic($dir, $file)."\\t".get_dns($dir, $file)."\\t".get_sni($dir, $file)."\\n";
             
           };
       };

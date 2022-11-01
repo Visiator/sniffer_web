@@ -979,7 +979,7 @@ function parse_t(v) {
     };
 };
 
-function update_line(ip, traffic, dns_name) {
+function update_line(ip, traffic, dns_name, ssni) {
 
 if(ip == '') return;
 
@@ -1005,9 +1005,12 @@ while(1==1)
         o.innerHTML = parse_t(traffic);
 
         o = document.getElementById('dns_'+ii);
-
         o.innerHTML = dns_name;
 
+        o = document.getElementById('sni_'+ii);
+        if(o.innerHTML == "") {
+           o.innerHTML = ssni;
+        }
         return;
     };
     ii++;
@@ -1027,7 +1030,7 @@ function update_result(r) {
     i = 0;
     while( i < rr.length) {
         let rrr = rr[i].split("\t");
-        update_line(rrr[0], rrr[1], rrr[2]);
+        update_line(rrr[0], rrr[1], rrr[2], rrr[3]);
         i++;
     };
     //console.log('endd');
@@ -1094,6 +1097,10 @@ function add_line_to_maintable(idx, ip) {
     td10.id = "del_m_" + idx;
     td10.innerHTML = "<a href=javascript:del_mikrotik('"+idx+"')>del_mikrotik</a>";
 
+    var td11 = document.createElement("td");
+    td11.id = "copy_pcap_" + idx;
+    td11.innerHTML = "<a href=javascript:copy_pcap("+idx+")>copy_pcap</a>";
+
     /*var link10=document.createElement("a");
     link10.appendChild(document.createTextNode("del"));
     link10.href = '#';
@@ -1111,6 +1118,7 @@ function add_line_to_maintable(idx, ip) {
     row.appendChild(td8);
     row.appendChild(td9);
     row.appendChild(td10);
+    row.appendChild(td11);
     
     tbody.appendChild(row);
     
