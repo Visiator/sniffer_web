@@ -38,8 +38,28 @@ function load_dns()
     
 }
 
-function get_dns($iip)
+function get_dns($dir, $filename)
 {
+    $fff = file_get_contents($dir .'/'. $filename);
+
+    $ff = explode("\n", $fff);
+    $s = '';
+    $c = '';
+    foreach($ff as $f)
+    {
+
+        $v = explode(":", $f, 2);
+        if($v[0] == 'dns_name') {
+            $s = $v[1];
+        } else {
+	    
+	}
+    };
+    //if($c == '') return $s;
+    //if($s == '') return $c;
+    return $s;
+
+/*
     global $dns_list;
     
     $j = count($dns_list);
@@ -52,6 +72,7 @@ function get_dns($iip)
         $i++;
     }
     return '';
+*/
 }
 
 function get_sni($dir, $filename)
@@ -135,7 +156,7 @@ foreach ($f as $file)
 {
     if($file != '.' && $file != '..')
     {
-        $dns = get_dns(get_ip($file));
+        $dns = get_dns('ip3', $file);
         
         $sni = get_sni('ip3', $file);
         
@@ -958,7 +979,7 @@ function parse_t(v) {
     };
 };
 
-function update_line(ip, traffic) {
+function update_line(ip, traffic, dns_name) {
 
 if(ip == '') return;
 
@@ -982,6 +1003,11 @@ while(1==1)
         o = document.getElementById('traffic_'+ii);
 
         o.innerHTML = parse_t(traffic);
+
+        o = document.getElementById('dns_'+ii);
+
+        o.innerHTML = dns_name;
+
         return;
     };
     ii++;
@@ -1001,7 +1027,7 @@ function update_result(r) {
     i = 0;
     while( i < rr.length) {
         let rrr = rr[i].split("\t");
-        update_line(rrr[0], rrr[1]);
+        update_line(rrr[0], rrr[1], rrr[2]);
         i++;
     };
     //console.log('endd');

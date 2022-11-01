@@ -38,6 +38,26 @@ function get_traffic($dir, $filename)
     return 'no';
 };
 
+function get_dns($dir, $filename)
+{
+    $fff = file_get_contents($dir .'/'. $filename);
+    $ff = explode("\n", $fff);
+    foreach($ff as $f)
+    {
+        echo($f."=");
+        $v = explode(":", $f, 3);
+        if(count($v)==2) {
+
+
+            if($v[0] == 'dns_name') return $v[1];
+
+        } else {
+            
+        }
+    };
+    return 'no';
+};
+
 
 function my_scan_dir($dir)
 {
@@ -54,7 +74,7 @@ function my_scan_dir($dir)
             
             
             
-            $rr .= $file."\\t".get_traffic($dir, $file)."\\n";
+            $rr .= $file."\\t".get_traffic($dir, $file)."\\t".get_dns($dir, $file)."\\n";
             
           };
       };
