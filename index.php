@@ -1192,8 +1192,8 @@ while($j < $i)
     </table>
     <? echo $tt; ?>
 </div>
-<iframe id=frm_tmp width=300 height=100 style="display:none1;"></iframe>
-<iframe id=frm_tmp2 width=300 height=100 style="display:none1;"></iframe>
+<iframe id=frm_tmp width=300 height=100 style="display:none;"></iframe>
+<iframe id=frm_tmp2 width=300 height=100 style="display:none;"></iframe>
 <textarea cols=60 rows=10 wrap=hard id=memo1></textarea>
 <a href=javascript:transform()>transform</a>&nbsp;
 <a href=javascript:transform24()>24</a>
